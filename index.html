@@ -20,7 +20,8 @@
       <h1>Access5 Modbus matcher</h1>
       <p class="sub">
         Upload your Access <strong>.json</strong> or <strong>.cas</strong> export (must include a <code>Variables</code> array).
-        The default <code>Access5ModbusSignals.xls</code> loads in the background—no server, same idea as the
+        The signal list is built in from <code>data/modbus_signals.json</code> (exported from
+        <code>Access5ModbusSignals.xls</code>)—no second file, no server, same idea as the
         <a href="https://hbradroc.github.io/dvf2Json/" target="_blank" rel="noopener">Magic JSON Converter</a>.
       </p>
 
@@ -29,15 +30,9 @@
         <input type="file" id="userFile" accept=".json,.cas,application/json" />
       </div>
 
-      <div class="field">
-        <label for="xlsFile">Optional — signal list (.xls)</label>
-        <input type="file" id="xlsFile" accept=".xls,.xlsx,application/vnd.ms-excel" />
-        <span class="field-hint">Leave empty to use the built‑in list from <code>data/Access5ModbusSignals.xls</code> (GitHub Pages) or upload if you opened this file locally.</span>
-      </div>
-
       <button type="button" id="actionBtn" disabled>Match and download CSV</button>
 
-      <div id="log" class="log" role="status" aria-live="polite">Loading default signal list…</div>
+      <div id="log" class="log" role="status" aria-live="polite">Loading signal list…</div>
 
       <details class="preview" id="preview">
         <summary>Preview matched rows</summary>
@@ -69,7 +64,6 @@
 
   <p class="footer-note">Systemair 467</p>
 
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

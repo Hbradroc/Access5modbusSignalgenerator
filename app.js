@@ -1,11 +1,10 @@
 /**
  * Modbus signal matcher — static page, no server.
- * Matches Access JSON/.cas Variables export to Access5ModbusSignals.xls sheet "List".
+ * Bundled signal list: data/modbus_signals.json (from Access5ModbusSignals.xls).
+ * User upload: Access .json / .cas with Variables array only.
  */
 
-/* global XLSX */
-
-const DEFAULT_XLS = "data/Access5ModbusSignals.xls";
+const SIGNALS_JSON = "data/modbus_signals.json";
 
 function normalizeName(name) {
   return String(name).replace(/[^A-Za-z0-9]/g, "").toLowerCase();
@@ -64,49 +63,6 @@ async function parseUserFile(file) {
   }
 
   throw new Error("Use .json or .cas");
-}
-
-function parseXlsArrayBuffer(arrayBuffer) {
-  const wb = XLSX.read(arrayBuffer, { type: "array", cellDates: false });
-  const sheetName =
-    wb.SheetNames.find((n) => /^list$/i.test(String(n).trim())) || wb.SheetNames[0];
-  const sheet = wb.Sheets[sheetName];
-  if (!sheet) throw new Error("No sheets in workbook.");
-
-  const rows = XLSX.utils.sheet_to_json(sheet, {
-    header: 1,
-    defval: "",
-    raw: false,
-  });
-
-  const headerRowIdx = 1;
-  if (rows.length <= headerRowIdx + 1) {
-    throw new Error("Spreadsheet too small (expected headers on row 2).");
-  }
-
-  const headerCells = rows[headerRowIdx];
-  const headers = headerCells.map((h, i) => (String(h).trim() || `col_${i}`));
-
-  const out = [];
-  for (let r = headerRowIdx + 1; r < rows.length; r++) {
-    const rowArr = rows[r];
-    if (!rowArr || !String(rowArr[0] || "").trim()) continue;
-
-    const row = {};
-    for (let c = 0; c < headers.length; c++) {
-      let v = rowArr[c];
-      if (typeof v === "number" && Number.isInteger(v)) {
-        /* keep */
-      } else if (typeof v === "string" && v.trim() !== "" && !Number.isNaN(Number(v))) {
-        const n = Number(v);
-        if (String(n) === v.trim()) v = n;
-      }
-      row[headers[c]] = v ?? "";
-    }
-    out.push(row);
-  }
-
-  return out;
 }
 
 function buildMatches(xlsRows, idx) {
@@ -181,18 +137,15 @@ function downloadCsv(rows) {
   URL.revokeObjectURL(a.href);
 }
 
-// --- UI ---
-
 const el = {
   log: document.getElementById("log"),
-  xlsFile: document.getElementById("xlsFile"),
   userFile: document.getElementById("userFile"),
   actionBtn: document.getElementById("actionBtn"),
   tbody: document.querySelector("#resultTable tbody"),
   preview: document.getElementById("preview"),
 };
 
-let xlsRows = null;
+let signalRows = null;
 let userIdx = null;
 let lastMatches = [];
 
@@ -206,46 +159,33 @@ function appendLog(line) {
 }
 
 function updateActionEnabled() {
-  el.actionBtn.disabled = !(xlsRows && userIdx);
+  el.actionBtn.disabled = !(signalRows && userIdx);
 }
 
-async function loadDefaultXls() {
-  setLog("Loading default signal list…");
+async function loadBundledSignals() {
+  setLog("Loading signal list…");
   try {
-    const res = await fetch(DEFAULT_XLS);
+    const res = await fetch(SIGNALS_JSON);
     if (!res.ok) throw new Error(res.statusText);
-    const buf = await res.arrayBuffer();
-    xlsRows = parseXlsArrayBuffer(buf);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.rows)) {
+      throw new Error("Invalid modbus_signals.json (expected .rows array).");
+    }
+    signalRows = data.rows;
+    const src = data.source || "modbus_signals.json";
     setLog(
-      `Default signal list ready: ${xlsRows.length} rows from Access5ModbusSignals.xls\n` +
-        `Upload your .json or .cas, then click “Match and download CSV”.`
+      `Signal list ready: ${signalRows.length} rows (from ${src}).\n` +
+        `Upload your Access .json or .cas, then click “Match and download CSV”.`
     );
   } catch (e) {
-    xlsRows = null;
+    signalRows = null;
     setLog(
-      `Could not load built-in spreadsheet (${e.message}).\n` +
-        `Upload Access5ModbusSignals.xls in the optional field above (needed for file:// or missing data/).`
+      `Could not load ${SIGNALS_JSON} (${e.message}).\n` +
+        `Rebuild with: python tools/build_signals_json.py`
     );
   }
   updateActionEnabled();
 }
-
-el.xlsFile.addEventListener("change", async (ev) => {
-  const f = ev.target.files[0];
-  if (!f) {
-    await loadDefaultXls();
-    return;
-  }
-  try {
-    const buf = await f.arrayBuffer();
-    xlsRows = parseXlsArrayBuffer(buf);
-    appendLog(`Using uploaded signal list: ${f.name} (${xlsRows.length} rows)`);
-  } catch (err) {
-    xlsRows = null;
-    appendLog(`Excel error: ${err.message}`);
-  }
-  updateActionEnabled();
-});
 
 el.userFile.addEventListener("change", async (ev) => {
   const f = ev.target.files[0];
@@ -306,19 +246,19 @@ function formatVal(v) {
 }
 
 el.actionBtn.addEventListener("click", () => {
-  if (!xlsRows || !userIdx) return;
+  if (!signalRows || !userIdx) return;
 
-  lastMatches = buildMatches(xlsRows, userIdx);
+  lastMatches = buildMatches(signalRows, userIdx);
   const exact = lastMatches.filter((r) => r.match_type === "exact").length;
   const norm = lastMatches.filter((r) => r.match_type === "normalized").length;
 
   appendLog(
-    `—\nMatched ${lastMatches.length} Excel rows (exact ${exact}, normalized ${norm}). ` +
-      `Excel rows scanned: ${xlsRows.length}. Unmatched rows omitted from CSV.`
+    `—\nMatched ${lastMatches.length} rows (exact ${exact}, normalized ${norm}). ` +
+      `Signal list size: ${signalRows.length}. Unmatched rows omitted from CSV.`
   );
 
   if (lastMatches.length === 0) {
-    appendLog("No CSV written (zero matches). Check file / signal names.");
+    appendLog("No CSV written (zero matches).");
     renderTable([]);
     el.preview.open = true;
     return;
@@ -330,4 +270,4 @@ el.actionBtn.addEventListener("click", () => {
   el.preview.open = true;
 });
 
-loadDefaultXls();
+loadBundledSignals();
