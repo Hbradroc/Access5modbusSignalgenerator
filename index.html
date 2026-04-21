@@ -3,80 +3,71 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modbus signal matcher</title>
+  <title>Access5 Modbus matcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Modbus signal matcher</h1>
+  <div class="shell">
+    <div class="card">
+      <a class="email-link" href="mailto:hbradroc@uwo.ca" title="Email">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        hbradroc@uwo.ca
+      </a>
+
+      <h1>Access5 Modbus matcher</h1>
       <p class="sub">
-        Matches your Access <strong>.json</strong> or <strong>.cas</strong> export against the default
-        <code>Access5ModbusSignals.xls</code> signal list. Equivalent to
-        <code>match_modbus_equivalents.py</code>.
+        Upload your Access <strong>.json</strong> or <strong>.cas</strong> export (must include a <code>Variables</code> array).
+        The default <code>Access5ModbusSignals.xls</code> loads in the background—no server, same idea as the
+        <a href="https://hbradroc.github.io/dvf2Json/" target="_blank" rel="noopener">Magic JSON Converter</a>.
       </p>
-    </header>
 
-    <section class="card">
-      <h2>1. Signal list (Excel)</h2>
-      <p id="xlsStatus" class="status">Loading default spreadsheet…</p>
-      <p class="hint">
-        Default file is loaded from <code>data/Access5ModbusSignals.xls</code> (same folder as this page).
-        If that fails (e.g. opening as <code>file://</code>), use the upload below.
-      </p>
-      <label class="file-btn">
-        <input type="file" id="xlsFile" accept=".xls,.xlsx,application/vnd.ms-excel" />
-        <span>Upload <code>Access5ModbusSignals.xls</code> manually</span>
-      </label>
-    </section>
-
-    <section class="card">
-      <h2>2. Your export</h2>
-      <label class="file-btn primary">
+      <div class="field">
+        <label for="userFile">Access export (.json / .cas)</label>
         <input type="file" id="userFile" accept=".json,.cas,application/json" />
-        <span>Upload <code>.json</code> or <code>.cas</code> (Access Variables export)</span>
-      </label>
-      <p id="userStatus" class="status muted">No file selected.</p>
-    </section>
-
-    <section class="card">
-      <h2>3. Run</h2>
-      <button type="button" id="runBtn" class="btn" disabled>Match signals</button>
-      <button type="button" id="downloadCsv" class="btn secondary" disabled>Download CSV</button>
-      <div id="stats" class="stats" hidden></div>
-    </section>
-
-    <section class="card">
-      <h2>Results</h2>
-      <div class="table-wrap">
-        <table id="resultTable">
-          <thead>
-            <tr>
-              <th>Match</th>
-              <th>Signal (Excel)</th>
-              <th>Matched (JSON)</th>
-              <th>JSON value</th>
-              <th>Public description</th>
-              <th>Col B (EXOL Type)</th>
-              <th>Col F (Bacnet)</th>
-              <th>Col J (Description)</th>
-              <th>Col K (BACnet Address)</th>
-              <th>Modbus type</th>
-              <th>Modbus address</th>
-              <th>Scale</th>
-              <th>Bacnet</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
       </div>
-      <p id="emptyHint" class="hint">Run a match to see rows here (exact + normalized only; unmatched Excel rows are omitted).</p>
-    </section>
 
-    <footer>
-      <p>Static site: host on GitHub Pages. See <code>README.md</code> in this folder.</p>
-    </footer>
+      <div class="field">
+        <label for="xlsFile">Optional — signal list (.xls)</label>
+        <input type="file" id="xlsFile" accept=".xls,.xlsx,application/vnd.ms-excel" />
+        <span class="field-hint">Leave empty to use the built‑in list from <code>data/Access5ModbusSignals.xls</code> (GitHub Pages) or upload if you opened this file locally.</span>
+      </div>
+
+      <button type="button" id="actionBtn" disabled>Match and download CSV</button>
+
+      <div id="log" class="log" role="status" aria-live="polite">Loading default signal list…</div>
+
+      <details class="preview" id="preview">
+        <summary>Preview matched rows</summary>
+        <div class="table-wrap">
+          <table id="resultTable">
+            <thead>
+              <tr>
+                <th>Match</th>
+                <th>Signal (Excel)</th>
+                <th>Matched (JSON)</th>
+                <th>JSON value</th>
+                <th>Public description</th>
+                <th>Col B</th>
+                <th>Col F</th>
+                <th>Col J</th>
+                <th>Col K</th>
+                <th>Modbus type</th>
+                <th>Modbus addr</th>
+                <th>Scale</th>
+                <th>Bacnet</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
   </div>
+
+  <p class="footer-note">Systemair 467</p>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>

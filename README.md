@@ -8,6 +8,8 @@ After you turn on GitHub Pages (see below), the site will be at:
 
 ---
 
+UI matches the style and flow of the [Magic JSON Converter](https://hbradroc.github.io/dvf2Json/) (centered card, Space Grotesk, one main action, log area). Still fully static—no backend.
+
 Static single-page app: loads **`data/Access5ModbusSignals.xls`** by default, you upload your Access export **`.json` or `.cas`** (same structure as the PCB JSON: top-level `"Variables"` array). It outputs **exact + normalized** matches in a table and as **CSV download** (same logic as `match_modbus_equivalents.py`).
 
 ## Files
