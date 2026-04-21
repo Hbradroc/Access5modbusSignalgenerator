@@ -139,6 +139,11 @@ function buildMatches(xlsRows, idx) {
       matched_json_signal: matchedName,
       json_value: baseToRaw[matchedName] ?? "",
       json_public_description: baseToDesc[matchedName] ?? "",
+      // Excel List sheet columns B, F, J, K (1-based)
+      column_B_EXOL_Type: row["EXOL Type"] ?? "",
+      column_F_Bacnet: row.Bacnet ?? "",
+      column_J_Description: row.Description ?? "",
+      column_K_BACnet_Address: row["BACnet Address"] ?? "",
       exol_type: row["EXOL Type"] ?? "",
       modbus_type: row["Modbus Type"] ?? "",
       modbus_address: row["Modbus address"] ?? "",
@@ -273,6 +278,10 @@ function renderTable(rows) {
       <td>${escapeHtml(r.matched_json_signal)}</td>
       <td>${escapeHtml(formatVal(r.json_value))}</td>
       <td>${escapeHtml(String(r.json_public_description))}</td>
+      <td>${escapeHtml(String(r.column_B_EXOL_Type))}</td>
+      <td>${escapeHtml(String(r.column_F_Bacnet))}</td>
+      <td>${escapeHtml(String(r.column_J_Description))}</td>
+      <td>${escapeHtml(String(r.column_K_BACnet_Address))}</td>
       <td>${escapeHtml(String(r.modbus_type))}</td>
       <td>${escapeHtml(String(r.modbus_address))}</td>
       <td>${escapeHtml(String(r.scale))}</td>
