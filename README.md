@@ -1,5 +1,13 @@
 # Modbus signal matcher (web)
 
+**Repository:** [github.com/Hbradroc/Access5modbusSignalgenerator](https://github.com/Hbradroc/Access5modbusSignalgenerator)
+
+After you turn on GitHub Pages (see below), the site will be at:
+
+**`https://hbradroc.github.io/Access5modbusSignalgenerator/`**
+
+---
+
 Static single-page app: loads **`data/Access5ModbusSignals.xls`** by default, you upload your Access export **`.json` or `.cas`** (same structure as the PCB JSON: top-level `"Variables"` array). It outputs **exact + normalized** matches in a table and as **CSV download** (same logic as `match_modbus_equivalents.py`).
 
 ## Files
@@ -15,16 +23,15 @@ Static single-page app: loads **`data/Access5ModbusSignals.xls`** by default, yo
 
 The app treats **`.cas` as UTF-8 JSON** with the same shape as your `.json` export (`FileType`, `Variables`, …). If your tool exports binary or non-JSON `.cas`, upload the **`.json`** export instead or rename a valid JSON export to `.cas` for testing.
 
-## Host on GitHub Pages
+## Host on GitHub Pages (one-time setup)
 
-1. Push this folder to your repository (or copy its contents into the repo’s **`docs/`** folder).
-2. In the repo: **Settings → Pages → Build and deployment → Branch**, select the branch and **`/docs`** (if you used `docs/`) or **`/(root)`**.
-3. Optional: add an empty **`.nojekyll`** file next to `index.html` so Jekyll does not touch the site (recommended if you deploy from `/docs`).
+1. Open the repo on GitHub: [Access5modbusSignalgenerator](https://github.com/Hbradroc/Access5modbusSignalgenerator).
+2. Go to **Settings → Pages** (left sidebar).
+3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
+4. **Branch:** `main`, folder **`/ (root)`**, then **Save**.
+5. Wait 1–2 minutes; refresh **Pages** until it shows “Your site is live at …”.
 
-After deploy, open:
-
-`https://<user>.github.io/<repo>/`  
-(or `.../modbus-signal-matcher-web/` if you only uploaded this subfolder without making it the site root—then ensure `data/Access5ModbusSignals.xls` is under that path.)
+This repo already includes **`.nojekyll`** at the root so GitHub Pages does not run Jekyll on your static files.
 
 ## Local use
 
